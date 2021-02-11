@@ -32,6 +32,16 @@
         android:padding="15dp">
 
         <TextView
+            android:id="@+id/tvPowerType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/margin_10dp"
+            android:drawablePadding="@dimen/margin_10dp"
+            android:text="@string/powerType"
+            android:layout_weight="0.3333"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/gray" />
+        <TextView
             android:id="@+id/tvDelivery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -42,16 +52,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/txt_color" />
 
-        <TextView
-            android:id="@+id/tvPowerType"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/margin_10dp"
-            android:drawablePadding="@dimen/margin_10dp"
-            android:text="@string/powerType"
-            android:layout_weight="0.3333"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/gray" />
+
 
         <TextView
             android:id="@+id/tvPayment"
@@ -89,7 +90,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="visible">
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -500,7 +501,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -856,7 +857,32 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
                 </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="   Upload doctors results"/>
 
+
+                <ImageView
+                    android:id="@+id/IdProf"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    app:srcCompat="@drawable/ic_baseline_image_24"
+                    android:layout_marginTop="1dp"
+                    android:background="@color/card_bg_color"/>
+
+                <Button
+                    android:id="@+id/UploadBtn"
+                    android:layout_width="180dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/button1"
+                    android:text="Upload"
+                    android:textAppearance="?android:textAppearanceMedium"
+                    android:textColor="@color/white"
+                    android:textStyle="bold" />
             </LinearLayout>
 
 
@@ -1230,7 +1256,7 @@
             android:text="@string/confirm"
             android:textAllCaps="true"
             android:textColor="@color/white"
-            android:visibility="gone" />
+            android:visibility="visible" />
 
         <TextView
             android:id="@+id/tvConfirmDelivery"
@@ -1249,7 +1275,7 @@
             android:text="confirm"
             android:textAllCaps="true"
             android:textColor="@color/white"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tvPlaceOrder"

@@ -1,11 +1,15 @@
 package com.mibtech.optical.activity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Html;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -17,6 +21,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -39,6 +44,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.mibtech.optical.helper.imageupload;
 import com.razorpay.Checkout;
 import com.razorpay.PaymentResultListener;
 
@@ -46,6 +52,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,6 +72,8 @@ import com.mibtech.optical.helper.Session;
 import com.mibtech.optical.helper.VolleyCallback;
 import com.mibtech.optical.model.Slot;
 
+import static com.mibtech.optical.helper.Constant.USER_ID;
+
 @SuppressLint("SetTextI18n")
 public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCallback, PaymentResultListener {
     private String TAG = CheckoutActivity.class.getSimpleName();
@@ -71,6 +81,7 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
     public TextView tvTaxPercent, tvTaxAmt, tvDelivery, tvPayment, tvPowerType,tvLocation, tvAlert, tvWltBalance, tvCity, tvName, tvTotal, tvDeliveryCharge, tvSubTotal, tvCurrent, tvWallet, tvPromoCode, tvPCAmount, tvPlaceOrder, tvConfirmOrder, tvPreTotal,tvConfirmDelivery;
     LinearLayout lytPayOption, lytTax, lytOrderList, lytWallet, lytCLocation, paymentLyt,powerTypeLyt, deliveryLyt, lytPayU, lytPayPal, lytRazorPay, dayLyt;
     Button btnApply;
+    Bitmap bitmap = null;
     EditText edtPromoCode;
     public ProgressBar prgLoading;
     Session session;
@@ -116,6 +127,11 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
 
     String tintermediate="null";
     String tadditional="null";
+
+    ImageView IDProf;
+    Button Upload_Btn;
+
+    private String Document_img1="";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -207,6 +223,27 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
         intermediate=findViewById(R.id.intermediate);
         additional=findViewById(R.id.additional);
 
+        IDProf=(ImageView)findViewById(R.id.IdProf);
+        Upload_Btn=(Button)findViewById(R.id.UploadBtn);
+
+        IDProf.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectImage();
+
+            }
+        });
+
+        Upload_Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(CheckoutActivity.this, "uploaded", Toast.LENGTH_SHORT).show();
+                Log.i(TAG, "onClick: "+"hello");
+                imageupload imageupload=new imageupload();
+                imageupload.uploadImageToImgur(bitmap,USER_ID,getApplicationContext());
+                ;
+            }
+        });
 
 
         rToday = findViewById(R.id.rToday);
@@ -418,6 +455,10 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
         PromoCodeCheck();
         setPaymentMethod();
     }
+    public static final int GET_FROM_GALLERY = 3;
+    private void selectImage() {
+        startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY);
+    }
 
     public void walletUncheck() {
         lytPayOption.setVisibility(View.VISIBLE);
@@ -548,8 +589,8 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
                 tvDelivery.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check, 0, 0, 0);
                 deliveryLyt.setVisibility(View.GONE);
                 tvConfirmDelivery.setVisibility(View.GONE);
-                powerTypeLyt.setVisibility(View.VISIBLE);
-                tvConfirmOrder.setVisibility(View.VISIBLE);
+                paymentLyt.setVisibility(View.VISIBLE);
+                tvPlaceOrder.setVisibility(View.VISIBLE);
                 //todo here add the logic to power of lens
                 //todo price increment on lens
 
@@ -561,9 +602,10 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
                 tvPowerType.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.light_green));
                 tvPowerType.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check, 0, 0, 0);
                 tvConfirmOrder.setVisibility(View.GONE);
-                tvPlaceOrder.setVisibility(View.VISIBLE);
-                paymentLyt.setVisibility(View.VISIBLE);
                 powerTypeLyt.setVisibility(View.GONE);
+               tvConfirmDelivery.setVisibility(View.VISIBLE);
+                deliveryLyt.setVisibility(View.VISIBLE);
+
                 if (ch999.isChecked())
                 {
                 lens_price=    ch999.getTag().toString().trim();
@@ -678,7 +720,7 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
         }
         final Map<String, String> sendparams = new HashMap<String, String>();
         sendparams.put(Constant.PLACE_ORDER, Constant.GetVal);
-        sendparams.put(Constant.USER_ID, session.getData(Session.KEY_ID));
+        sendparams.put(USER_ID, session.getData(Session.KEY_ID));
         sendparams.put(Constant.TAX_PERCENT, String.valueOf(Constant.SETTING_TAX));
         sendparams.put(Constant.TAX_AMOUNT, DatabaseHelper.decimalformatData.format(taxAmt));
         sendparams.put(Constant.TOTAL, String.valueOf(total));//try todo
@@ -713,6 +755,11 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
         sendparams.put("LVA",tLVA);//HERE
         sendparams.put("intermediate",tintermediate);//HERE
         sendparams.put("additional",tadditional);//HERE
+        if (imageupload.Companion.getRealurl()==null)
+            sendparams.put("imageUrl","value is null");
+        else
+        sendparams.put("imageUrl",imageupload.Companion.getRealurl());
+
 
 
         System.out.println("=====params " + sendparams.toString());
@@ -923,7 +970,7 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
     public void AddTransaction(String orderId, String paymentType, String txnid, final String status, String message, Map<String, String> sendparams) {
         Map<String, String> transparams = new HashMap<>();
         transparams.put(Constant.Add_TRANSACTION, Constant.GetVal);
-        transparams.put(Constant.USER_ID, sendparams.get(Constant.USER_ID));
+        transparams.put(USER_ID, sendparams.get(USER_ID));
         transparams.put(Constant.ORDER_ID, orderId);
         transparams.put(Constant.TYPE, paymentType);
         transparams.put(Constant.TRANS_ID, txnid);
@@ -1011,7 +1058,7 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
                     pBar.setVisibility(View.VISIBLE);
                     Map<String, String> params = new HashMap<String, String>();
                     params.put(Constant.VALIDATE_PROMO_CODE, Constant.GetVal);
-                    params.put(Constant.USER_ID, session.getData(Session.KEY_ID));
+                    params.put(USER_ID, session.getData(Session.KEY_ID));
                     params.put(Constant.PROMO_CODE, promoCode);
                     params.put(Constant.TOTAL, String.valueOf(total));
 
@@ -1085,6 +1132,20 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
         super.onActivityResult(requestCode, resultCode, data);
         if (data != null)
             paymentModelClass.TrasactionMethod(data, CheckoutActivity.this);
+        if(requestCode==GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
+            Uri selectedImage = data.getData();
+
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+                IDProf.setImageBitmap(bitmap);
+            } catch (FileNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -1136,7 +1197,20 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
             tvPlaceOrder.setVisibility(View.GONE);
             paymentLyt.setVisibility(View.GONE);
             deliveryLyt.setVisibility(View.VISIBLE);
-        } else
+        }
+
+
+        if (deliveryLyt.getVisibility() == View.VISIBLE) {
+            walletUncheck();
+            tvDelivery.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.gray));
+            tvDelivery.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_next_process_gray, 0, 0, 0);
+            tvPowerType.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
+            tvPowerType.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_next_process, 0, 0, 0);
+            tvConfirmOrder.setVisibility(View.VISIBLE);
+            tvConfirmDelivery.setVisibility(View.GONE);
+            deliveryLyt.setVisibility(View.GONE);
+            powerTypeLyt.setVisibility(View.VISIBLE);
+        }else
             super.onBackPressed();
     }
 
@@ -1144,7 +1218,7 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
 
         Map<String, String> params = new HashMap<String, String>();
         params.put(Constant.GET_USER_DATA, Constant.GetVal);
-        params.put(Constant.USER_ID, session.getData(Session.KEY_ID));
+        params.put(USER_ID, session.getData(Session.KEY_ID));
         ApiConfig.RequestToVolley(new VolleyCallback() {
             @Override
             public void onSuccess(boolean result, String response) {
@@ -1197,6 +1271,8 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
         }, CheckoutActivity.this, Constant.SETTING_URL, params, false);
 
     }
+
+
 
 
     public class SlotAdapter extends RecyclerView.Adapter<SlotAdapter.ViewHolder> {
