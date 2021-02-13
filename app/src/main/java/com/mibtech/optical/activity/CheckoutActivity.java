@@ -54,7 +54,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.mibtech.optical.helper.imageupload;
+
 import com.razorpay.Checkout;
 import com.razorpay.PaymentResultListener;
 
@@ -252,8 +252,6 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
             public void onClick(View view) {
                 Toast.makeText(CheckoutActivity.this, "uploaded", Toast.LENGTH_SHORT).show();
                 Log.i(TAG, "onClick: "+"hello");
-               // imageupload imageupload=new imageupload();
-              //  imageupload.uploadImageToImgur(bitmap,USER_ID,getApplicationContext());
                  dialog = ProgressDialog.show(CheckoutActivity.this, "",
                         "uploading image. Please wait...", true);
                 uploadFirebase();
@@ -267,7 +265,9 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
                     // Create a storage reference from our app
                     FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
                     StorageReference storageReferenceProfilePic = firebaseStorage.getReference();
-                    final StorageReference imageRef = storageReferenceProfilePic.child("uploads" + "/" + "Image Name" + ".jpg");
+                    Long tsLong = System.currentTimeMillis()/1000;
+                    String ts = tsLong.toString();
+                    final StorageReference imageRef = storageReferenceProfilePic.child("uploads" + "/" + ts + ".jpg");
 
 
 // Create a reference to 'images/mountains.jpg'
