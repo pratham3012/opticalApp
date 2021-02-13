@@ -44,6 +44,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.mibtech.optical.helper.imageupload;
 import com.razorpay.Checkout;
 import com.razorpay.PaymentResultListener;
@@ -131,7 +141,13 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
     ImageView IDProf;
     Button Upload_Btn;
 
+    DatabaseReference myref;
+    StorageReference reference;
+    FirebaseAuth firebaseAuth;
+    Uri urlupload;
+    Uri imageuri;
     private String Document_img1="";
+    ProgressDialog dialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -212,9 +228,6 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
         RCYL=findViewById(R.id.RCYL);
         RAXIS=findViewById(R.id.RAXIS);
         RVA=findViewById(R.id.RVA);
-
-
-
         LSPH=findViewById(R.id.LSPH);
         LCYL=findViewById(R.id.LCYL);
         LAXIS=findViewById(R.id.LAXIS);
@@ -239,9 +252,52 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
             public void onClick(View view) {
                 Toast.makeText(CheckoutActivity.this, "uploaded", Toast.LENGTH_SHORT).show();
                 Log.i(TAG, "onClick: "+"hello");
-                imageupload imageupload=new imageupload();
-                imageupload.uploadImageToImgur(bitmap,USER_ID,getApplicationContext());
+               // imageupload imageupload=new imageupload();
+              //  imageupload.uploadImageToImgur(bitmap,USER_ID,getApplicationContext());
+                 dialog = ProgressDialog.show(CheckoutActivity.this, "",
+                        "uploading image. Please wait...", true);
+                uploadFirebase();
                 ;
+            }
+
+            private void uploadFirebase() {
+                if (imageuri!=null)
+                {
+
+                    // Create a storage reference from our app
+                    FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+                    StorageReference storageReferenceProfilePic = firebaseStorage.getReference();
+                    final StorageReference imageRef = storageReferenceProfilePic.child("uploads" + "/" + "Image Name" + ".jpg");
+
+
+// Create a reference to 'images/mountains.jpg'
+
+                    imageRef.putFile(imageuri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Toast.makeText(CheckoutActivity.this, "sucess", Toast.LENGTH_SHORT).show();
+
+
+                            try {
+                                imageRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                    @Override
+                                    public void onSuccess(Uri uri) {
+                                        Log.i("urlis",uri.toString());
+                                        Toast.makeText(CheckoutActivity.this, "got it do it now", Toast.LENGTH_SHORT).show();
+                                        urlupload=uri;
+                                        dialog.dismiss();
+                                    }
+                                });
+                            }
+                            catch ( Exception e)
+                            {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    });
+
+                }
             }
         });
 
@@ -755,10 +811,7 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
         sendparams.put("LVA",tLVA);//HERE
         sendparams.put("intermediate",tintermediate);//HERE
         sendparams.put("additional",tadditional);//HERE
-        if (imageupload.Companion.getRealurl()==null)
-            sendparams.put("imageUrl","value is null");
-        else
-        sendparams.put("imageUrl",imageupload.Companion.getRealurl());
+        sendparams.put("imageUrl",urlupload.toString());
 
 
 
@@ -1134,6 +1187,7 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
             paymentModelClass.TrasactionMethod(data, CheckoutActivity.this);
         if(requestCode==GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
             Uri selectedImage = data.getData();
+            imageuri=selectedImage;
 
             try {
                 bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
