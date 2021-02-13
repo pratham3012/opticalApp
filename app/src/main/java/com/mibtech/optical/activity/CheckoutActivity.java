@@ -725,6 +725,7 @@ public class CheckoutActivity extends AppCompatActivity implements OnMapReadyCal
 
                 }
 
+
                 try {
                     lens_val=Integer.parseInt(lens_price);
                 }catch (Exception e)
