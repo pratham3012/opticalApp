@@ -274,12 +274,12 @@
     <string name="antiGlare3">Anti Glare (Rs 1999)</string>
 
     <string name="blueBlock1">Blue Block (Rs 1399)</string>
-    <string name="blueBlock2">Anti Glare (Rs 1699)</string>
-    <string name="blueBlock3">Anti Glare (Rs 2899)</string>
+    <string name="blueBlock2">BLue Block (Rs 1699)</string>
+    <string name="blueBlock3">Blue Block (Rs 2899)</string>
 
-    <string name="photoChromics1">Anti Glare (Rs 1199)</string>
-    <string name="photoChromics2">Anti Glare (Rs 1899)</string>
-    <string name="photoChromics3">Anti Glare (Rs 2699)</string>
+    <string name="photoChromics1">Photo Chromics (Rs 1199)</string>
+    <string name="photoChromics2">Photo Chromics (Rs 1899)</string>
+    <string name="photoChromics3">Photo Chromics (Rs 2699)</string>
     
     <string name="newRx">New Rx</string>
 
